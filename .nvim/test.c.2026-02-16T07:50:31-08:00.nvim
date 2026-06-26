@@ -1,0 +1,31 @@
+#define _DEFAULT_SOURCE
+#include "alloc.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#define HEADER_SIZE (sizeof(struct header))
+
+int main() {
+  struct allocinfo info;
+  void *p[11] = {NULL};
+  int size = sizeof(int32_t) * 2;
+  int32_t *ptr = (int32_t *)alloc(size);
+
+  if (ptr != NULL) {
+    ptr[0] = 0;
+    ptr[1] = 1;
+    char buffer[5000];
+    snprintf(buffer, sizeof(buffer), "ptr minus header size: %lu\n",
+             *(uint64_t *)((char *)ptr - HEADER_SIZE));
+    write(1, buffer, strlen(buffer));
+
+    snprintf(buffer, sizeof(buffer), "size plus header size: %lu\n",
+             size + HEADER_SIZE);
+    write(1, buffer, strlen(buffer));
+  }
+  write(1, "Hello World", strlen("Hello World"));
+  return 0;
+}

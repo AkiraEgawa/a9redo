@@ -1,0 +1,281 @@
+#define _GNU_SOURCE
+#include "alloc.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+#define HEADER_SIZE (sizeof(struct header))
+
+// Reminder to self, header should be 16 bytes?
+// it's a pointer and an unsigned int
+// I dislike static, let me change everything for the fun of it
+struct header *listFront = NULL; // literally stole this from lab
+
+void *initialSbrk = NULL;
+enum algs curAlg = FIRST_FIT;
+uint64_t maxSize = 0;
+uint64_t heapUsed = 0;
+
+int grow_heap() {
+  if (heapUsed + INCREMENT > maxSize)
+    return -1;
+
+  void *mem = sbrk(INCREMENT);
+
+  if (mem == (void *)-1) {
+    // This means you messed up
+    return -1;
+  }
+  heapUsed += INCREMENT;
+
+  struct header *newBlock = (struct header *)mem;
+  newBlock->size = INCREMENT;
+  newBlock->next = listFront;
+  // surprisingly this works? it's a linked list
+  listFront = newBlock;
+
+  return 1; // aka, you didn't mess up
+}
+
+// I need something for block finding
+// gonna steal from lab
+
+// what does tracking need to find
+// I need: the block, the prev (why isn't it a doubly linked list)
+// have user pass in a pointers, so I don't need to do manipulation
+
+// the return value just tells you if you messed up
+int find_first_fit(uint64_t size, struct header **chosen,
+                   struct header **chosenPrev) {
+  struct header *cur = listFront;
+  struct header *prev = NULL;
+  while (cur != NULL) {
+    if (cur->size >= size) {
+      // set in here in case some issues happen
+      *chosen = cur;
+      *chosenPrev = prev;
+      return 0;
+    }
+    prev = cur;
+    cur = cur->next;
+  }
+  return -1;
+}
+
+int find_best_fit(uint64_t size, struct header **chosen,
+                  struct header **chosenPrev) {
+  struct header *cur = listFront;
+  struct header *prev = NULL;
+  uint64_t size_diff = 0;
+  int found = -1; // size_diff has to be uint, as size is uint
+
+  while (cur != NULL) {
+    if (cur->size >= size) {
+      // block is larger than data
+      if (((cur->size - size) < size_diff) || (found == -1)) {
+        *chosen = cur;
+        *chosenPrev = prev;
+        size_diff = cur->size - size;
+        found = 1; // oops, forgot that
+      }
+    }
+    prev = cur;
+    cur = cur->next;
+  }
+  return found; // if found is -1, then we messed up, if it's 1, then we good
+}
+
+// if I'm right, worst fit is just a single sign difference?
+int find_worst_fit(uint64_t size, struct header **chosen,
+                   struct header **chosenPrev) {
+  struct header *cur = listFront;
+  struct header *prev = NULL;
+  uint64_t size_diff = 0;
+  int found = -1; // size_diff has to be uint, as size is uint
+
+  while (cur != NULL) {
+    if (cur->size >= size) {
+      // block is larger than data
+      if (((cur->size - size) > size_diff) || (found == -1)) {
+        *chosen = cur;
+        *chosenPrev = prev;
+        size_diff = cur->size - size;
+        found = 1; // oops, forgot that
+      }
+    }
+    prev = cur;
+    cur = cur->next;
+  }
+  return found; // if found is -1, then we messed up, if it's 1, then we good
+}
+
+int findBlock(uint64_t size, struct header **chosen,
+              struct header **chosenPrev) {
+
+  // reset them before doing anything, makes life easier
+  *chosen = NULL;
+  *chosenPrev = NULL;
+  int found;
+  if (curAlg == FIRST_FIT)
+    found = find_first_fit(size, chosen, chosenPrev);
+  else if (curAlg == BEST_FIT)
+    found = find_best_fit(size, chosen, chosenPrev);
+  else if (curAlg == WORST_FIT)
+    found = find_worst_fit(size, chosen, chosenPrev);
+  else
+    return -1;
+  return found;
+}
+
+void *alloc(int size) {
+  // start here
+  if (size <= 0)
+    return NULL; // user is dumb
+  // I wanna sbrk by increment? but gotta check first
+  uint64_t totalSize = size + HEADER_SIZE;
+  // allocate the pointers for them first
+  struct header *block;
+  struct header *prev;
+
+  while (1) {
+    findBlock(totalSize, &block, &prev);
+    if (block != NULL)
+      break;
+    // I need something to check if heap is needed I am dumb
+    if (grow_heap() == -1)
+      return NULL; // aka, we can't allocate more space, and there's no block
+                   // existing
+  }
+
+  // okay, now block is prev both have something on them, as break was activated
+  // when I break a block up, we get total size, and another header
+  // as such, size i need is totalSize + sizeof(struct header) why isn't there a
+  // typedef?
+
+  // split or no split?
+  // bool split = (block->size > (totalSize + sizeof(struct header)));
+  // let's try a slightly different split condition
+  uint64_t remainder = block->size - totalSize;
+  bool split = remainder > HEADER_SIZE;
+  // dear self, you are actually stupid
+  // these two are teh same conditions
+  if (!split) {
+    // previous block now points to the next block (skip cur)
+    // if no previous, then cur->next is now head
+    if (prev) {
+      prev->next = block->next;
+    } else {
+      listFront = block->next;
+    }
+
+    return (void *)(block + 1);
+  }
+
+  if (split) {
+    // so, we determine where the crevice is
+    struct header *newFree =
+        (struct header *)((char *)block + totalSize); // this creates a new
+                                                      // header at the end
+    newFree->size = block->size - totalSize;
+    newFree->next = block->next;
+
+    if (prev) {
+      prev->next = newFree;
+    } else {
+      listFront = newFree;
+    }
+
+    block->size = totalSize; // yes, we gotta reassign this
+
+    // dear nvim, please stop extending my comments for me, it's annoying
+    return (void *)(block + 1);
+    // for reference for future me: block+1 skips the header
+  }
+  // I will have return in split, so return 0 should logically never run
+  // if it does, it means I've f'd up a bit too much
+  char buffer[500];
+  snprintf(buffer, sizeof(buffer),
+           "alloc: block=%p size=%lu payload=%lu split=%d\n", block,
+           block->size, block->size - HEADER_SIZE, split);
+  write(1, buffer, strlen(buffer));
+  return 0; // to shut linter up
+}
+
+void dealloc(void *ptr) {
+  if (ptr == NULL) {
+    return;
+  } // you gave a NULL for some reason?
+
+  struct header *hdr = ((struct header *)ptr) - 1;
+
+  // insert at head
+  hdr->next = listFront;
+  listFront = hdr;
+
+  // let's cycle through the blocks, just follow old logic or smth
+  struct header *cur = listFront;
+  while (cur != NULL) {
+    struct header *next = cur->next; // look at next block
+    if (next != NULL) {
+      if ((char *)cur + cur->size == (char *)next) {
+        cur->size += next->size;
+        cur->next = next->next;
+        continue;
+      } else if ((char *)next + next->size == (char *)cur) {
+        next->size += cur->size;
+        if(cur == listFront){
+          listFront = cur->next;
+        }
+        cur = next;
+        next = cur->next;
+        continue;
+      }
+      // gotta continue to see if we have more continuous blocks
+      // if this is true, we also messed up, but wtv
+    }
+    cur = cur->next;
+  }
+}
+
+void allocopt(enum algs algorithm, int size) {
+  // max size is global for my sake
+  if (initialSbrk == NULL) {
+    initialSbrk = sbrk(0); // sbrk(0) grabs the program break at 0
+  }
+
+  brk(initialSbrk);
+
+  listFront = NULL;
+  heapUsed = 0;
+
+  curAlg = algorithm;
+  maxSize = size;
+}
+
+struct allocinfo allocinfo() {
+  // free_size is the space in list, just do running sum
+  // free_chunks is free chunks, just do running sum with free_size
+  // largest and smallest are running max and min respectively
+
+  struct allocinfo result = {0, 0, 0, 0};
+  if (listFront == NULL)
+    return result;
+
+  struct header *cur = listFront;
+  while (cur != NULL) {
+    result.free_size += cur->size - HEADER_SIZE;
+    result.free_chunks++;
+    if (cur->size > result.largest_free_chunk_size ||
+        result.largest_free_chunk_size == 0) {
+      result.largest_free_chunk_size = cur->size;
+    }
+    if (cur->size < result.smallest_free_chunk_size ||
+        result.smallest_free_chunk_size == 0) {
+      result.smallest_free_chunk_size = cur->size;
+    }
+    cur = cur->next;
+  }
+  return result;
+}

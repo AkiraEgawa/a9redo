@@ -1,0 +1,12 @@
+{"version": 2, "width": 102, "height": 51, "timestamp": 1771257902, "idle_time_limit": 5.0, "env": {"SHELL": "/usr/bin/zsh", "TERM": "xterm-256color"}}
+[0.092424, "o", "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                     \r \r"]
+[0.093158, "o", "\u001b]2;cmpt201@b048c4bcba33:~/units/04-long-assignments/a9-AkiraEgawa\u0007\u001b]1;..a9-AkiraEgawa\u0007"]
+[0.094671, "o", "\u001b]7;file://b048c4bcba33/home/cmpt201/units/04-long-assignments/a9-AkiraEgawa\u001b\\"]
+[0.106707, "o", "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[recording] \u001b[34m~/units/04-long-assignments/a9-AkiraEgawa\u001b[32m❯\u001b[39m \u001b[K"]
+[0.106877, "o", "\u001b[?1h\u001b=\u001b[?2004h"]
+[0.643941, "i", "e"]
+[0.645583, "o", "e"]
+[0.647359, "o", "\b\u001b[1m\u001b[31me\u001b[0m\u001b[39m"]
+[0.647477, "o", "\b\u001b[1m\u001b[31me\u001b[0m\u001b[39m\u001b[92mxit\u001b[39m\b\b\b"]
+[0.831611, "i", "c"]
+[0.832688, "o", "\b\u001b[1m\u001b[31me\u001b[1m\u001b[31mc\u001b[0m\u001b[39m\u001b[39m \u001b[39m \b\b"]

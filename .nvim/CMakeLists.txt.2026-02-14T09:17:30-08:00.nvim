@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.14)
+
+project(main C CXX)
+add_executable(main src/main.c src/alloc.c)
+set_target_properties(main PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED ON)
+include_directories(include)
+target_compile_options(main PRIVATE)
+target_link_options(main PRIVATE)
+
+# if you're wondering why I'm typing so efficiently
+# I'm literally copying from assignment 8
+
+

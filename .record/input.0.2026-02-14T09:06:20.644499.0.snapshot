@@ -1,0 +1,12 @@
+{"version": 2, "width": 102, "height": 51, "timestamp": 1771088780, "idle_time_limit": 5.0, "env": {"SHELL": "/usr/bin/zsh", "TERM": "xterm-256color"}}
+[0.095805, "o", "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                     \r \r"]
+[0.096496, "o", "\u001b]2;cmpt201@b048c4bcba33:~/units/04-long-assignments/a9-AkiraEgawa\u0007\u001b]1;..a9-AkiraEgawa\u0007"]
+[0.097881, "o", "\u001b]7;file://b048c4bcba33/home/cmpt201/units/04-long-assignments/a9-AkiraEgawa\u001b\\"]
+[0.10968, "o", "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[recording] \u001b[34m~/units/04-long-assignments/a9-AkiraEgawa\u001b[32m❯\u001b[39m \u001b[K"]
+[0.109859, "o", "\u001b[?1h\u001b=\u001b[?2004h"]
+[0.451435, "i", "t"]
+[0.453139, "o", "t"]
+[0.454781, "o", "\b\u001b[1m\u001b[31mt\u001b[0m\u001b[39m"]
+[0.454925, "o", "\b\u001b[1m\u001b[31mt\u001b[0m\u001b[39m\u001b[92mouch Makefile\u001b[39m\u001b[13D"]
+[0.531516, "i", "o"]
+[0.531942, "o", "\b\u001b[1m\u001b[31mt\u001b[1m\u001b[31mo\u001b[0m\u001b[39m"]

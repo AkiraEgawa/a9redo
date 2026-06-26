@@ -1,0 +1,12 @@
+{"version": 2, "width": 120, "height": 30, "timestamp": 1771128497, "idle_time_limit": 5.0, "env": {"SHELL": "/usr/bin/zsh", "TERM": "xterm-256color"}}
+[0.110028, "o", "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                       \r \r"]
+[0.110747, "o", "\u001b]2;cmpt201@b048c4bcba33:~/units/04-long-assignments/a9-AkiraEgawa\u0007\u001b]1;..a9-AkiraEgawa\u0007"]
+[0.112414, "o", "\u001b]7;file://b048c4bcba33/home/cmpt201/units/04-long-assignments/a9-AkiraEgawa\u001b\\"]
+[0.124365, "o", "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[recording] \u001b[34m~/units/04-long-assignments/a9-AkiraEgawa\u001b[32m❯\u001b[39m \u001b[K"]
+[0.124503, "o", "\u001b[?1h\u001b=\u001b[?2004h"]
+[26.645283, "i", "n"]
+[26.647785, "o", "n"]
+[26.649862, "o", "\b\u001b[1m\u001b[31mn\u001b[0m\u001b[39m"]
+[26.649996, "o", "\b\u001b[1m\u001b[31mn\u001b[0m\u001b[39m\u001b[92mvim src/alloc.c\u001b[39m\u001b[15D"]
+[26.780709, "i", "v"]
+[26.781154, "o", "\b\u001b[1m\u001b[31mn\u001b[1m\u001b[31mv\u001b[0m\u001b[39m"]

@@ -1,0 +1,134 @@
+#define _GNU_SOURCE
+#include "alloc.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <unistd.h>
+
+// Reminder to self, header should be 16 bytes?
+// it's a pointer and an unsigned int
+// I dislike static, let me change everything for the fun of it
+struct header *listFront = NULL; // literally stole this from lab
+
+enum algs curAlg = FIRST_FIT;
+uint64_t heapUsed = 0;
+
+int grow_heap() {
+  void *mem = sbrk(INCREMENT);
+  if (mem == (void *)-1) {
+    // This means you messed up
+    return -1;
+  }
+  heapUsed += INCREMENT;
+
+  struct header *newBlock = (struct header *)mem;
+  newBlock->size = INCREMENT;
+  newBlock->next = listFront;
+  // surprisingly this works? it's a linked list
+  listFront = newBlock;
+
+  return 1; // aka, you didn't mess up
+}
+
+// I need something for block finding
+// gonna steal from lab
+
+// what does tracking need to find
+// I need: the block, the prev (why isn't it a doubly linked list)
+// have user pass in a pointers, so I don't need to do manipulation
+
+// the return value just tells you if you messed up
+int find_first_fit(uint64_t size, struct header **chosen,
+                   struct header **chosenPrev) {
+  struct header *cur = listFront;
+  struct header *prev = NULL;
+  while (cur != NULL) {
+    if (cur->size >= size) {
+      // set in here in case some issues happen
+      *chosen = cur;
+      *chosenPrev = prev;
+      return 0;
+    }
+    prev = cur;
+    cur = cur->next;
+  }
+  return -1;
+}
+
+int find_best_fit(uint64_t size, struct header **chosen,
+                  struct header **chosenPrev) {
+  struct header *cur = listFront;
+  struct header *prev = NULL;
+  uint64_t size_diff = 0;
+  int found = -1; // size_diff has to be uint, as size is uint
+
+  while (cur != NULL) {
+    if (cur->size >= size) {
+      // block is larger than data
+      if (((cur->size - size) < size_diff) || (found == -1)) {
+        *chosen = cur;
+        *chosenPrev = prev;
+        size_diff = cur->size - size;
+        found = 1; // oops, forgot that
+      }
+    }
+    prev = cur;
+    cur = cur->next;
+  }
+  return found; // if found is -1, then we messed up, if it's 1, then we good
+}
+
+// if I'm right, worst fit is just a single sign difference?
+int find_worst_fit(uint64_t size, struct header **chosen,
+                   struct header **chosenPrev) {
+  struct header *cur = listFront;
+  struct header *prev = NULL;
+  uint64_t size_diff = 0;
+  int found = -1; // size_diff has to be uint, as size is uint
+
+  while (cur != NULL) {
+    if (cur->size >= size) {
+      // block is larger than data
+      if (((cur->size - size) > size_diff) || (found == -1)) {
+        *chosen = cur;
+        *chosenPrev = prev;
+        size_diff = cur->size - size;
+        found = 1; // oops, forgot that
+      }
+    }
+    prev = cur;
+    cur = cur->next;
+  }
+  return found; // if found is -1, then we messed up, if it's 1, then we good
+}
+
+int findBlock(uint64_t size, struct header **chosen,
+              struct header **chosenPrev) {
+
+  // reset them before doing anything, makes life easier
+  *chosen = NULL;
+  *chosenPrev = NULL;
+  int found;
+  if (curAlg == FIRST_FIT)
+    found = find_first_fit(size, chosen, chosenPrev);
+  else if (curAlg == BEST_FIT)
+    found = find_best_fit(size, chosen, chosenPrev);
+  else if (curAlg == WORST_FIT)
+    found = find_worst_fit(size, chosen, chosenPrev);
+  else
+    return -1;
+  return found;
+}
+
+void *alloc(int size) {
+  // start here
+  // I wanna sbrk by increment? but gotta check first
+}
+
+void dealloc(void *place) { return; }
+
+void allocopt(enum algs algorithm, int size) { return; }
+
+struct allocinfo allocinfo() {
+  struct allocinfo test = {1, 2, 3, 4};
+  return test;
+}

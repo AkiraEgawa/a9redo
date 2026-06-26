@@ -1,0 +1,13 @@
+#include <stdint.h>
+#include <stdio.h>
+#include "alloc.h"
+void* alloc(int size){return 0;}
+
+void dealloc(void* place){return;}
+
+void allocopt(enum algs, int size);
+
+struct allocinfo allocinfo(){
+  struct allocinfo test = {1,2,3,4};
+  return test;
+}
